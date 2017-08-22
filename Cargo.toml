@@ -1,0 +1,15 @@
+[package]
+name = "jubjub"
+version = "0.0.1"
+authors = ["Sean Bowe <ewillbefull@gmail.com>"]
+
+[dependencies]
+pairing = "0.11"
+rand = "0.3"
+
+[dependencies.bellman]
+version = "0.0.3"
+
+[features]
+default = ["u128-support"]
+u128-support = ["pairing/u128-support", "bellman/u128-support"]
