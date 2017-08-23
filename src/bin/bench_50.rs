@@ -1,24 +1,24 @@
-// This stuff forces rustc to avoid jemalloc so that massif can profile it easier.
-// START
-        #![feature(global_allocator, allocator_api)]
+// // This stuff forces rustc to avoid jemalloc so that massif can profile it easier.
+// // START
+//         #![feature(global_allocator, allocator_api)]
 
-        use std::heap::{Alloc, System, Layout, AllocErr};
+//         use std::heap::{Alloc, System, Layout, AllocErr};
 
-        struct MyAllocator;
+//         struct MyAllocator;
 
-        unsafe impl<'a> Alloc for &'a MyAllocator {
-            unsafe fn alloc(&mut self, layout: Layout) -> Result<*mut u8, AllocErr> {
-                System.alloc(layout)
-            }
+//         unsafe impl<'a> Alloc for &'a MyAllocator {
+//             unsafe fn alloc(&mut self, layout: Layout) -> Result<*mut u8, AllocErr> {
+//                 System.alloc(layout)
+//             }
 
-            unsafe fn dealloc(&mut self, ptr: *mut u8, layout: Layout) {
-                System.dealloc(ptr, layout)
-            }
-        }
+//             unsafe fn dealloc(&mut self, ptr: *mut u8, layout: Layout) {
+//                 System.dealloc(ptr, layout)
+//             }
+//         }
 
-        #[global_allocator]
-        static GLOBAL: MyAllocator = MyAllocator;
-// END
+//         #[global_allocator]
+//         static GLOBAL: MyAllocator = MyAllocator;
+// // END
 
 extern crate pairing;
 extern crate bellman;
@@ -112,7 +112,9 @@ fn main() {
     let rng = &mut thread_rng();
     let mut generator_rng = XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
     let j = JubJub::new();
+    println!("Creating random generators for the Pedersen hash...");
     let generators = generate_constant_table(&mut generator_rng, &j);
+    println!("Done!");
     drop(generator_rng);
 
     if !Path::new("params").exists() {
@@ -126,7 +128,7 @@ fn main() {
 
     let mut total = Duration::new(0, 0);
 
-    const SAMPLES: u32 = 50;
+    const SAMPLES: u32 = 5;
 
     println!("Creating {} proofs and averaging the time spent creating them.", SAMPLES);
 
