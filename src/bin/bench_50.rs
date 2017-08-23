@@ -126,7 +126,7 @@ fn main() {
 
     let mut total = Duration::new(0, 0);
 
-    const SAMPLES: u32 = 5;
+    const SAMPLES: u32 = 50;
 
     println!("Creating {} proofs and averaging the time spent creating them.", SAMPLES);
 
