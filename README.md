@@ -2,6 +2,20 @@
 
 This is a research project being built for [Zcash](https://z.cash/).
 
+## Running
+
+Using Rust's nightly compiler:
+
+```
+cargo run --release --bin bench_50
+```
+
+Using ARM or can't use Rust's nightly compiler? Pass `--no-default-features`.
+
+```
+cargo run --release --no-default-features --bin bench_50
+```
+
 ## License
 
 Licensed under either of
