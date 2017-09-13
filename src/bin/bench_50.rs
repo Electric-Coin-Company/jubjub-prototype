@@ -83,7 +83,7 @@ impl<'a> Circuit<Bls12> for DemoPedersenHashCircuit<'a> {
             bits.push(Bit::alloc(cs, *b)?);
         }
 
-        const DEPTH: usize = 50;
+        const DEPTH: usize = 100;
 
         for i in 0..DEPTH {
             let num = pedersen_hash(cs, &bits, self.generators, self.j)?;
@@ -128,7 +128,7 @@ fn main() {
 
     let mut total = Duration::new(0, 0);
 
-    const SAMPLES: u32 = 5;
+    const SAMPLES: u32 = 50;
 
     println!("Creating {} proofs and averaging the time spent creating them.", SAMPLES);
 
