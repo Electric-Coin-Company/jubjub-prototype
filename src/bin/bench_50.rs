@@ -54,7 +54,7 @@ impl<'a> DemoPedersenHashCircuit<'a> {
         j: &'a JubJub
     ) -> DemoPedersenHashCircuit<'a>
     {
-        assert!(bits.len() == 512);
+        assert_eq!(bits.len(), 512);
 
         DemoPedersenHashCircuit {
             bits: bits.iter().map(|&b| Assignment::known(b)).collect(),
@@ -79,7 +79,7 @@ impl<'a> Circuit<Bls12> for DemoPedersenHashCircuit<'a> {
     fn synthesize<CS: ConstraintSystem<Bls12>>(self, cs: &mut CS) -> Result<Self::InputMap, Error>
     {
         let mut bits = Vec::with_capacity(512);
-        for b in self.bits.iter() {
+        for b in &self.bits {
             bits.push(Bit::alloc(cs, *b)?);
         }
 
@@ -110,7 +110,7 @@ use std::path::Path;
 
 fn main() {
     let rng = &mut thread_rng();
-    let mut generator_rng = XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
+    let mut generator_rng = XorShiftRng::from_seed([0x5dbe_6259, 0x8d31_3d76, 0x3237_db17, 0xe5bc_0654]);
     let j = JubJub::new();
     println!("Creating random generators for the Pedersen hash...");
     let generators = generate_constant_table(&mut generator_rng, &j);
