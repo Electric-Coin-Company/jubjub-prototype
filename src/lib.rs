@@ -56,7 +56,7 @@ fn test_synth() {
             }
         }
 
-        assert!(acc == constants[b]);
+        assert_eq!(acc, constants[b]);
     }
 }
 
@@ -76,9 +76,9 @@ impl<T> Assignment<T> {
     }
 
     pub fn get(&self) -> Result<&T, Error> {
-        match self {
-            &Assignment::Known(ref v) => Ok(v),
-            &Assignment::Unknown => Err(Error::AssignmentMissing)
+        match *self {
+            Assignment::Known(ref v) => Ok(v),
+            Assignment::Unknown => Err(Error::AssignmentMissing)
         }
     }
 }
@@ -239,7 +239,7 @@ impl<E: Engine> Num<E> {
 impl<E: Engine> Clone for Num<E> {
     fn clone(&self) -> Num<E> {
         Num {
-            value: self.value.clone(),
+            value: self.value,
             var: self.var
         }
     }
@@ -255,8 +255,8 @@ fn coordinate_lookup<E: Engine, CS: ConstraintSystem<E>>(
     d: Bit
 ) -> Result<Num<E>, Error>
 {
-    assert!(bits.len() == 4);
-    assert!(table.len() == 16);
+    assert_eq!(bits.len(), 4);
+    assert_eq!(table.len(), 16);
 
     // The result variable
     let mut r_val = Assignment::unknown();
@@ -322,9 +322,9 @@ fn point_lookup<E: Engine, CS: ConstraintSystem<E>>(
 ) -> Result<(Num<E>, Num<E>), Error>
     where E: Engine
 {
-    assert!(bits.len() == 4);
-    assert!(x_table.len() == 16);
-    assert!(y_table.len() == 16);
+    assert_eq!(bits.len(), 4);
+    assert_eq!(x_table.len(), 16);
+    assert_eq!(y_table.len(), 16);
 
     // Three values need to be precomputed:
 
@@ -333,10 +333,10 @@ fn point_lookup<E: Engine, CS: ConstraintSystem<E>>(
     let c = bits[3].and(cs, &bits[2])?; // 1100
     let d = c.and(cs, &bits[1])?;       // 1110
 
-    let x = coordinate_lookup(cs, &x_table, &bits, a, b, c, d)?;
-    let y = coordinate_lookup(cs, &y_table, &bits, a, b, c, d)?;
+    let x_coord = coordinate_lookup(cs, x_table, bits, a, b, c, d)?;
+    let y_coord = coordinate_lookup(cs, y_table, bits, a, b, c, d)?;
 
-    Ok((x, y))
+    Ok((x_coord, y_coord))
 }
 
 #[test]
@@ -470,6 +470,12 @@ pub struct Point {
     y: Fr
 }
 
+impl Default for JubJub {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl JubJub {
     pub fn new() -> JubJub {
         JubJub {
@@ -477,6 +483,7 @@ impl JubJub {
             d: Fr::from_str("19257038036680949359750312669786877991949435402254120286184196891950884077233").unwrap(),
             //s: Fr::from_str("17814886934372412843466061268024708274627479829237077604635722030778476050649").unwrap()
         }
+
     }
 }
 
@@ -635,14 +642,14 @@ pub fn pedersen_hash<CS>(
 ) -> Result<Num<Bls12>, Error>
     where CS: ConstraintSystem<Bls12>
 {
-    assert!(bits.len() == 512);
-    assert!(generators.len() == (512/4));
+    assert_eq!(bits.len(), 512);
+    assert_eq!(generators.len(), (512/4));
 
     let mut lookups = vec![];
 
     for (fourbits, &(ref x_table, ref y_table)) in bits.chunks(4).zip(generators.iter()) {
-        assert!(x_table.len() == 16);
-        assert!(y_table.len() == 16);
+        assert_eq!(x_table.len(), 16);
+        assert_eq!(y_table.len(), 16);
 
         lookups.push(point_lookup(cs, x_table, y_table, fourbits)?);
     }
@@ -750,7 +757,7 @@ fn test_pedersen() {
             j: &'a JubJub
         ) -> MyLookupCircuit<'a>
         {
-            assert!(bits.len() == 512);
+            assert_eq!(bits.len(), 512);
 
             MyLookupCircuit {
                 bits: bits.iter().map(|&b| Assignment::known(b)).collect(),
@@ -898,10 +905,10 @@ impl FunBit {
         -> Result<FunBit, Error>
     {
         Ok(match (*self, *other) {
-            (FunBit::Constant(false), a @ _) | (a @ _, FunBit::Constant(false)) => {
+            (FunBit::Constant(false), a) | (a, FunBit::Constant(false)) => {
                 a
             },
-            (FunBit::Constant(true), a @ _) | (a @ _, FunBit::Constant(true)) => {
+            (FunBit::Constant(true), a) | (a, FunBit::Constant(true)) => {
                 a.not()
             },
             (FunBit::Is(a_var, a_val), FunBit::Is(b_var, b_val)) |
@@ -942,7 +949,7 @@ impl FunBit {
             (FunBit::Constant(false), _) | (_, FunBit::Constant(false)) => {
                 FunBit::Constant(false)
             },
-            (FunBit::Constant(true), a @ _) | (a @ _, FunBit::Constant(true)) => {
+            (FunBit::Constant(true), a) | (a, FunBit::Constant(true)) => {
                 a
             },
             (FunBit::Is(a_var, a_val), FunBit::Is(b_var, b_val)) => {
@@ -1073,7 +1080,7 @@ fn testy_more_pedersen()
             j: &'a JubJub
         ) -> MyLookupCircuit<'a>
         {
-            assert!(bits.len() == 512);
+            assert_eq!(bits.len(), 512);
 
             MyLookupCircuit {
                 bits: bits.iter().map(|&b| Assignment::known(b)).collect(),
